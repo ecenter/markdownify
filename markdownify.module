@@ -1,0 +1,156 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Provides API functions for working with the Markdownify library.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function markdownify_menu() {
+  $items = array();
+  $items['markdown2html'] = array(
+    'page callback' => 'markdownify_markdown2html',
+    'access callback' => 'markdownify_convert_access',
+    'type' => MENU_CALLBACK,
+  );
+  $items['html2markdown'] = array(
+    'page callback' => 'markdownify_html2markdown',
+    'access callback' => 'markdownify_convert_access',
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/markdownify/test'] = array(
+    'page callback' => 'markdownify_test',
+    'access arguments' => array('access markdownify tests'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function markdownify_perm() {
+  return array('access markdownify', 'convert any text (dangerous)', 'access markdownify tests');
+}
+
+/**
+ * Markdownify access callback
+ */
+function markdownify_convert_access() {
+  return user_access('convert any text (dangerous)') || (
+    user_access('access markdownify') && 
+    isset($_POST['token']) && 
+    drupal_valid_token($_POST['token'], 'markdownify')
+  );
+}
+
+/**
+ * Include Markdownify library
+ */
+function markdownify_include() {
+  require_once(dirname(__FILE__) .'/markdownify/markdownify.php');
+  require_once(dirname(__FILE__) .'/markdownify/markdownify_extra.php');
+}
+
+/**
+ * Enable Markdownify with token-based access checking
+ */
+function markdownify_on() {
+  static $enabled;
+  if (!$enabled) {
+    markdownify_include();
+    drupal_add_js(array(
+      'MarkdownifyToken' => drupal_get_token('markdownify'),
+    ), 'setting');
+    $enabled = TRUE;
+  }
+  return $enabled;
+}
+
+/**
+ * Convert HTML to Markdown via HTTP POST
+ *
+ * @param $extra
+ *   If TRUE, use Markdownify_Extra.
+ * @return
+ *   Converted string 
+ */
+function markdownify_html2markdown($extra = FALSE) {
+  markdownify_include();
+  $extra = ($extra) ? '_Extra' : '';
+
+  $class = 'Markdownify'. $extra;
+  $markdownify = new $class();
+
+  // Process with pre and post process alter invocations
+  $output = $_POST['input'];
+  drupal_alter('markdownify_html2markdown_preprocess', $output, $_POST);
+  $output = $markdownify->parseString($_POST['input']);
+  drupal_alter('markdownify_html2markdown_postprocess', $output, $_POST);
+
+  drupal_set_header('Content-Type: text/javascript; charset=utf-8');
+  echo json_encode(array('output' => $output));
+  exit();
+}
+
+/*
+ * Convert Markdown to HTML via HTTP POST
+ *
+ * @return
+ *   Converted string 
+ */
+function markdownify_markdown2html() {
+  $output = $_POST['input'];
+
+  // Process with pre and post process alter invocations
+  drupal_alter('markdownify_markdown2html_preprocess', $output, $_POST);
+  $output = _markdown_process($output, -1);
+  drupal_alter('markdownify_markdown2html_postprocess', $output, $_POST);
+  
+  drupal_set_header('Content-Type: text/javascript; charset=utf-8');
+  echo json_encode(array('output' => $output));
+  exit();
+}
+
+/**
+ * Markdownify test page
+ */
+function markdownify_test() {
+  markdownify_include();
+  $post = array('test' => TRUE);
+
+  drupal_add_css(drupal_get_path('module', 'markdownify') .'/markdownify-test.css');
+
+  $markdown = file_get_contents(dirname(__FILE__) .'/test/markdown-test.markdown');
+  $html = file_get_contents(dirname(__FILE__) .'/test/html-test.html');
+  $readme = file_get_contents(dirname(__FILE__) .'/README.markdown');
+
+  $markdownify = new Markdownify_Extra();
+
+  $output .= '<h2>'. t('HTML to Markdown') .'</h2>';
+  $output .= '<h3>'. t('Source') .'</h3>';
+  $output .= '<pre class="markdownify-output">'. htmlspecialchars($html) .'</pre>';
+  drupal_alter('markdownify_html2markdown_preprocess', $html, $test);
+  $html = $markdownify->parseString($html);
+  drupal_alter('markdownify_html2markdown_postprocess', $html, $test);
+  $output .= '<h3>'. t('Output') .'</h3>';
+  $output .= '<pre class="markdownify-output">'. $html .'</pre>';
+
+  $output .= '<h2>'. t('Markdown to HTML') .'</h2>';
+  $output .= '<h3>'. t('Source') .'</h3>';
+  $output .= '<pre class="markdownify-output">'. $markdown .'</pre>';
+  drupal_alter('markdownify_markdown2html_preprocess', $markdown, $test);
+  $markdown = _markdown_process($markdown, -1);
+  drupal_alter('markdownify_markdown2html_postprocess', $markdown, $test);
+  $output .= '<h3>'. t('Output') .'</h3>';
+  $output .= '<pre class="markdownify-output">'. htmlspecialchars($markdown) .'</pre>';
+
+  $output .= '<hr />';
+  $output .= '<h2>'. t('Readme') .'</h2>';
+  $output .= '<div class="markdownify-output">'. _markdown_process($readme, -1) .'</div>';
+
+  return $output;
+}
