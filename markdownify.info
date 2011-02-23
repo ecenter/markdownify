@@ -1,0 +1,6 @@
+; $Id$
+name = Markdownify
+description = Provide Markdownify library via an API and URLs for AJAX callbacks.
+package = Utilities
+dependencies[] = markdown
+core = 6.x
