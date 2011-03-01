@@ -9,9 +9,10 @@ functions and URLs that convert HTTP POSTed input for users with the correct
 permissions and output JSON, appropriate for AJAX callbacks. 
 
 Markdownify is a PHP library that converts HTML to Markdown and Markdown Extra.
-Markdownify is included with this package.
+Markdownify is licensed under the GNU Lesser General Public License (LGPL) &
+is distributed with this package for convenience.
 
-Markdownify is licensed under the Fermitools license (see LICENSE.txt).
+Markdownify module is licensed under the Fermitools license (see LICENSE.txt).
 
 # Reference
 
