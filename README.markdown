@@ -4,7 +4,7 @@
 Accelerator Laboratory and the U.S. Department of Energy as part of the 
 [E-Center Project][1].*
 
-This module provides the [Markdownify][1] library (included) to Drupal via API
+This module provides the [Markdownify][2] library (included) to Drupal via API
 functions and URLs that convert HTTP POSTed input for users with the correct
 permissions and output JSON, appropriate for AJAX callbacks. 
 
