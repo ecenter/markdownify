@@ -1,26 +1,41 @@
 # Markdownify
 
+*Developed and maintained by David Eads (davideads@gmail.com) for Fermi National
+Accelerator Laboratory and the U.S. Department of Energy as part of the 
+[E-Center Project][1].*
+
 This module provides the [Markdownify][1] library (included) to Drupal via API
 functions and URLs that convert HTTP POSTed input for users with the correct
 permissions and output JSON, appropriate for AJAX callbacks. 
 
 Markdownify is a PHP library that converts HTML to Markdown and Markdown Extra.
-Markdownify is included, re-licensed for this module under the GPL (see [this 
-conversation thread][2]).
+Markdownify is included with this package.
 
 # Reference
+
+## Permissions
+
+Users **must** have the `markdownify access` permission to convert text, and
+may only access conversion when `markdownify_on()` is invoked (see below). 
+
+Users with the `convert any text (dangerous)` permission may POST arbitrary
+input to the Markdown converters. Grant with care! This permission could easily
+allow remote users to use your site to return arbitrary, potentially unsafe
+data payloads.
 
 ## API functions
 
 ### `markdownify_include()`
 
-Include the markdownify_libraries.
+Include the Markdownify libraries. Call if you need access to the Markdownify
+and Markdownify_Extra APIs.
 
 ### `markdownify_on()`
 
-Turn on Markdownify. Set a token that can be used for access checking.
+Turn on Markdownify. Sets a token that is used for access checking in the
+callback functions. Call when using Markdownify on a content editing form.
 
-## URLs
+## AJAX callback URLs
 
 ### `/markdown2html`
 
@@ -38,12 +53,17 @@ Tests, including this README file.
 
 ## Hooks
 
-This module defines these `_alter` hooks:
+This module defines these `_alter` hooks which take an input string as their
+parameter:
 
-* `markdownify_markdown2html_preprocess`
-* `markdownify_markdown2html_postprocess`
-* `markdownify_html2markdown_preprocess`
-* `markdownify_html2markdown_postprocess`
+* `markdownify_markdown2html_preprocess_alter`
+* `markdownify_markdown2html_postprocess_alter`
+* `markdownify_html2markdown_preprocess_alter`
+* `markdownify_html2markdown_postprocess_alter`
 
- [1]: http://milianw.de/projects/markdownify/
- [2]: http://drupal.org/node/299545
+Use the alter hooks to manipulate data as it is processed by Markdownify. For
+example, use `mymodule_markdownify_html2markdown_postprocess_alter` to remove 
+extraneous tags added by TinyMCE when converting TinyMCE source to Markdown.
+
+ [1]: https://cdcvs.fnal.gov/redmine/projects/ecenter/
+ [2]: http://milianw.de/projects/markdownify/
