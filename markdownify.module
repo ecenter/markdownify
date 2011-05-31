@@ -128,6 +128,32 @@ function markdownify_markdown2html() {
 }
 
 /**
+ * Implementation of hook_wysiwyg_plugin().
+ */
+function markdownify_wysiwyg_plugin($editor, $version) {
+  if ($editor == 'tinymce' && version_compare($version, '3', '>')) {
+    return array(
+      'markdown' => array(
+        'path' => drupal_get_path('module', 'markdownify') .'/js',
+        'filename' => 'markdown_plugin.js',
+        'extensions' => array('markdown' => t('Markdown')),
+        'load' => TRUE,
+      ),
+    );
+  }
+}
+
+/**
+ * Implementation of hook_wysiwyg_editor_settings_alter.
+ */
+function markdownify_wysiwyg_editor_settings_alter(&$settings, $context) {
+  $plugins = !empty($settings['plugins']) ? explode(',', $settings['plugins']) : NULL;
+  if ($plugins && in_array('markdown', $plugins)) {
+    markdownify_on();
+  }
+}
+
+/**
  * Markdownify test page
  */
 function markdownify_test() {
