@@ -18,7 +18,7 @@ Markdownify module is licensed under the Fermitools license (see LICENSE.txt).
 
 ## Permissions
 
-Users **must** have the `markdownify access` permission to convert text, and
+Users must have the `access markdownify` permission to convert text, and
 may only access conversion when `markdownify_on()` is invoked (see below). 
 
 Users with the `convert any text (dangerous)` permission may POST arbitrary
