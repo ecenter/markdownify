@@ -22,7 +22,7 @@ function markdownify_menu() {
   );
   $items['admin/markdownify/test'] = array(
     'page callback' => 'markdownify_test',
-    'access arguments' => array('access markdownify tests'),
+    'access arguments' => array('access markdownify example pages'),
     'type' => MENU_CALLBACK,
   );
 
@@ -116,11 +116,40 @@ function markdownify_markdown2html() {
 }
 
 /**
+ * Implementation of hook_wysiwyg_plugin().
+ */
+function markdownify_wysiwyg_plugin($editor, $version) {
+  if ($editor == 'tinymce' && version_compare($version, '3', '>')) {
+    return array(
+      'markdown' => array(
+        'path' => drupal_get_path('module', 'markdownify')
+          .'/js/markdown_plugin.js',
+        'extensions' => array('markdown' => t('Markdown')),
+        'load' => TRUE,
+      ),
+    );
+  }
+}
+
+/**
+ * Implementation of hook_wysiwyg_editor_settings_alter().
+ *
+ * Enabled markdownify when WYISWYG plugin is found.
+ */
+function markdownify_wysiwyg_editor_settings_alter(&$settings, $context) {
+  $plugins = !empty($settings['plugins']) ? explode(',', $settings['plugins']) : NULL;
+  if ($plugins && in_array('markdown', $plugins)) {
+    markdownify_on();
+  }
+}
+
+/**
  * Markdownify test page
  */
 function markdownify_test() {
   markdownify_include();
   $post = array('test' => TRUE);
+  $output = '';
 
   drupal_add_css(drupal_get_path('module', 'markdownify') .'/markdownify-test.css');
 
