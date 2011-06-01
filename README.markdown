@@ -8,7 +8,8 @@ This module provides the [Markdownify][2] library (included) to Drupal via API
 functions and URLs that convert HTTP POSTed input for users with the correct
 permissions and output JSON, appropriate for AJAX callbacks. 
 
-Markdownify is a PHP library that converts HTML to Markdown and Markdown Extra. Markdownify is licensed under the GNU Lesser General Public License (LGPL) &
+Markdownify is a PHP library that converts HTML to Markdown and Markdown Extra.
+Markdownify is licensed under the GNU Lesser General Public License (LGPL) &
 is distributed with this package for convenience.
 
 # Reference
