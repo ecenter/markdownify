@@ -11,17 +11,26 @@ permissions and output JSON, appropriate for AJAX callbacks.
 Markdownify is a PHP library that converts HTML to Markdown and Markdown Extra. Markdownify is licensed under the GNU Lesser General Public License (LGPL) &
 is distributed with this package for convenience.
 
+Markdownify module is licensed under the Fermitools license (see LICENSE.txt).
+
 # Reference
 
 ## Permissions
 
-Users **must** have the `markdownify access` permission to convert text, and
+Users must have the `access markdownify` permission to convert text, and
 may only access conversion when `markdownify_on()` is invoked (see below). 
 
-Users with the `convert any text (dangerous)` permission may POST arbitrary
+Users with the `markdownify any text` permission may POST arbitrary
 input to the Markdown converters. Grant with care! This permission could easily
 allow remote users to use your site to return arbitrary, potentially unsafe
 data payloads.
+
+## WYSIWYG Integration
+
+If WYISWYG module is installed, this module provides a TinyMCE plugin that 
+uses Markdownify's AJAX callbacks to use TinyMCE as a Markdown editor. To use,
+enable on a WYISWYG module profile using a text format with Markdown as the 
+first filter.
 
 ## API functions
 

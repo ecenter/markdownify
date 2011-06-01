@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function markdownify_menu() {
   $items = array();
@@ -22,7 +22,7 @@ function markdownify_menu() {
   );
   $items['admin/markdownify/test'] = array(
     'page callback' => 'markdownify_test',
-    'access arguments' => array('access markdownify tests'),
+    'access arguments' => array('access markdownify example pages'),
     'type' => MENU_CALLBACK,
   );
 
@@ -30,17 +30,31 @@ function markdownify_menu() {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_permission().
  */
-function markdownify_perm() {
-  return array('access markdownify', 'convert any text (dangerous)', 'access markdownify tests');
+function markdownify_permission() {
+  return array(
+    'access markdownify' => array(
+      'title' => t('Access markdownify'),
+      'description' => t('Access markdownify AJAX callback with special token.'),
+    ),
+    'markdownify any text' => array(
+      'title' => t('Convert any text'),
+      'description' => t('Allow user to post arbitrary text to markdownify 
+        AJAX callback (<strong>dangerous</strong>).'),
+    ),
+    'access markdownify example pages' => array(
+      'title' => t('Access Markdownify example pages'),
+      'description' => t('Access Markdownify example pages.'),
+    ),
+  ); 
 }
 
 /**
  * Markdownify access callback
  */
 function markdownify_convert_access() {
-  return user_access('convert any text (dangerous)') || (
+  return user_access('markdownify any text') || (
     user_access('access markdownify') && 
     isset($_POST['token']) && 
     drupal_valid_token($_POST['token'], 'markdownify')
@@ -91,9 +105,7 @@ function markdownify_html2markdown($extra = FALSE) {
   $output = $markdownify->parseString($_POST['input']);
   drupal_alter('markdownify_html2markdown_postprocess', $output, $_POST);
 
-  drupal_set_header('Content-Type: text/javascript; charset=utf-8');
-  echo json_encode(array('output' => $output));
-  exit();
+  drupal_json_output(array('output' => $output));
 }
 
 /*
@@ -107,12 +119,38 @@ function markdownify_markdown2html() {
 
   // Process with pre and post process alter invocations
   drupal_alter('markdownify_markdown2html_preprocess', $output, $_POST);
-  $output = _markdown_process($output, -1);
+  $output = _filter_markdown($output, 0);
   drupal_alter('markdownify_markdown2html_postprocess', $output, $_POST);
   
-  drupal_set_header('Content-Type: text/javascript; charset=utf-8');
-  echo json_encode(array('output' => $output));
-  exit();
+  drupal_json_output(array('output' => $output));
+}
+
+/**
+ * Implements hook_wysiwyg_plugin().
+ */
+function markdownify_wysiwyg_plugin($editor, $version) {
+  if ($editor == 'tinymce' && version_compare($version, '3', '>')) {
+    return array(
+      'markdown' => array(
+        'path' => drupal_get_path('module', 'markdownify') .'/js',
+        'filename' => 'markdown_plugin.js',
+        'extensions' => array('markdown' => t('Markdown')),
+        'load' => TRUE,
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_wysiwyg_editor_settings_alter().
+ *
+ * Enabled markdownify when WYISWYG plugin is found.
+ */
+function markdownify_wysiwyg_editor_settings_alter(&$settings, $context) {
+  $plugins = !empty($settings['plugins']) ? explode(',', $settings['plugins']) : NULL;
+  if ($plugins && in_array('markdown', $plugins)) {
+    markdownify_on();
+  }
 }
 
 /**
@@ -121,6 +159,7 @@ function markdownify_markdown2html() {
 function markdownify_test() {
   markdownify_include();
   $post = array('test' => TRUE);
+  $output = '';
 
   drupal_add_css(drupal_get_path('module', 'markdownify') .'/markdownify-test.css');
 
@@ -143,14 +182,13 @@ function markdownify_test() {
   $output .= '<h3>'. t('Source') .'</h3>';
   $output .= '<pre class="markdownify-output">'. $markdown .'</pre>';
   drupal_alter('markdownify_markdown2html_preprocess', $markdown, $test);
-  $markdown = _markdown_process($markdown, -1);
+  $markdown = _filter_markdown($markdown, 0);
   drupal_alter('markdownify_markdown2html_postprocess', $markdown, $test);
   $output .= '<h3>'. t('Output') .'</h3>';
   $output .= '<pre class="markdownify-output">'. htmlspecialchars($markdown) .'</pre>';
 
   $output .= '<hr />';
   $output .= '<h2>'. t('Readme') .'</h2>';
-  $output .= '<div class="markdownify-output">'. _markdown_process($readme, -1) .'</div>';
-
+  $output .= '<div class="markdownify-output">'. _filter_markdown($readme, 0) .'</div>';
   return $output;
 }
