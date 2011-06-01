@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function markdownify_menu() {
   $items = array();
@@ -30,7 +30,7 @@ function markdownify_menu() {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_permission().
  */
 function markdownify_permission() {
   return array(
@@ -119,8 +119,6 @@ function markdownify_markdown2html() {
 
   // Process with pre and post process alter invocations
   drupal_alter('markdownify_markdown2html_preprocess', $output, $_POST);
-  
-  // @TODO new call needed...
   $output = _filter_markdown($output, 0);
   drupal_alter('markdownify_markdown2html_postprocess', $output, $_POST);
   
@@ -128,7 +126,7 @@ function markdownify_markdown2html() {
 }
 
 /**
- * Implementation of hook_wysiwyg_plugin().
+ * Implements hook_wysiwyg_plugin().
  */
 function markdownify_wysiwyg_plugin($editor, $version) {
   if ($editor == 'tinymce' && version_compare($version, '3', '>')) {
@@ -144,7 +142,9 @@ function markdownify_wysiwyg_plugin($editor, $version) {
 }
 
 /**
- * Implementation of hook_wysiwyg_editor_settings_alter.
+ * Implements hook_wysiwyg_editor_settings_alter().
+ *
+ * Enabled markdownify when WYISWYG plugin is found.
  */
 function markdownify_wysiwyg_editor_settings_alter(&$settings, $context) {
   $plugins = !empty($settings['plugins']) ? explode(',', $settings['plugins']) : NULL;
