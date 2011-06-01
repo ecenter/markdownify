@@ -22,7 +22,7 @@ function markdownify_menu() {
   );
   $items['admin/markdownify/test'] = array(
     'page callback' => 'markdownify_test',
-    'access arguments' => array('access markdownify tests'),
+    'access arguments' => array('access markdownify example pages'),
     'type' => MENU_CALLBACK,
   );
 
