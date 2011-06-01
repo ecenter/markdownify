@@ -26,6 +26,13 @@ input to the Markdown converters. Grant with care! This permission could easily
 allow remote users to use your site to return arbitrary, potentially unsafe
 data payloads.
 
+## WYSIWYG Integration
+
+If WYISWYG module is installed, this module provides a TinyMCE plugin that 
+uses Markdownify's AJAX callbacks to use TinyMCE as a Markdown editor. To use,
+enable on a WYISWYG module profile using a text format with Markdown as the 
+first filter.
+
 ## API functions
 
 ### `markdownify_include()`
