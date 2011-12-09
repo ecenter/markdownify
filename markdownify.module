@@ -154,6 +154,14 @@ function markdownify_wysiwyg_editor_settings_alter(&$settings, $context) {
 }
 
 /**
+ * Implements markdownify_html2markdown_postprocess_alter().
+ */
+function markdownify_markdownify_html2markdown_postprocess_alter(&$output, $post) {
+  // Output breaks added by Tinymce as newlines
+  $output = str_replace(array('<br />', '<br>', '<br _moz_dirty="">'), "\r\n", $output);
+}
+
+/**
  * Markdownify test page
  */
 function markdownify_test() {
